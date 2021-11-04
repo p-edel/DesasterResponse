@@ -21,6 +21,7 @@ The model is trained on disaster data provided by Figure Eight.
 
 ### Files and Descriptions
 
+'''bash
 ├───app
 │   │   run.py                      # runs ETL and ML Pipeline         
 │   │   plots.ipynb                 # test-notebook for plots
@@ -38,3 +39,4 @@ The model is trained on disaster data provided by Figure Eight.
 └───models
         classifier.pkl              # trained model
         train_classifier.py         # ML pipeline
+'''
