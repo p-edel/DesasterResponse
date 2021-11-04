@@ -7,6 +7,7 @@ import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag
+
 nltk.download(['punkt', 'wordnet','averaged_perceptron_tagger']) # download ressources
 
 from sklearn.pipeline import Pipeline
@@ -20,6 +21,8 @@ from sklearn.model_selection import GridSearchCV
 import pickle
 
 def load_data(database_filepath):
+    """ load data from database """
+    
     # create sqlite engine
     engine = create_engine(f"sqlite:///{database_filepath}")
     
@@ -35,6 +38,8 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """ normalize, tokenize and lemmatize messages """
+    
     # normalize
     text = text.lower()
 
@@ -48,6 +53,7 @@ def tokenize(text):
 
 
 def build_model():
+    """ build ML Model Pipeline with Count-Vectorizer, TfidfTranformer and RandomForest Classifier """
     
     # build ML-Pipeline 
     pipeline = Pipeline([
@@ -69,6 +75,8 @@ def build_model():
     
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """ make predictions on test set and evaluate metrics """
+    
     #predictions on text set
     y_pred = model.predict(X_test)
     
@@ -79,11 +87,14 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """ save model """
     # save model as pickle object
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
+    """ run ML-Workflow  """
+    
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))

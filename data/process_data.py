@@ -3,6 +3,8 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """ load messages and category data from raw csv """
+    
     # load messages
     messages = pd.read_csv(messages_filepath)
     
@@ -16,6 +18,8 @@ def load_data(messages_filepath, categories_filepath):
     
 
 def clean_data(df):
+    """ clean raw data """
+    
     # create a dataframe of the 36 individual category columns
     categories = df.categories.str.split(pat=";", expand=True)
 
@@ -49,6 +53,8 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
+    """ save cleaned data to database """
+    
     # create sqllite db
     engine = create_engine(f"sqlite:///{database_filename}")
     
@@ -57,6 +63,7 @@ def save_data(df, database_filename):
     
 
 def main():
+    """ clean and save raw data """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
