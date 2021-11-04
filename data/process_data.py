@@ -1,17 +1,60 @@
 import sys
-
+import pandas as pd
+from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    # load messages
+    messages = pd.read_csv(messages_filepath)
+    
+    # load categories
+    categories = pd.read_csv(categories_filepath) 
 
+    # merge datasets
+    df = pd.merge(messages, categories, on="id")
+    
+    return df
+    
 
 def clean_data(df):
-    pass
+    # create a dataframe of the 36 individual category columns
+    categories = df.categories.str.split(pat=";", expand=True)
 
+    # select the first row of the categories dataframe
+    row = categories.iloc[[0]]
+
+    # use this row to extract a list of new column names for categories.
+    category_colnames = row.apply(lambda x: x.str.slice(0,-2))
+    category_colnames = category_colnames.to_numpy()
+    
+    # rename the columns of `categories`
+    categories.columns = category_colnames[0]   
+    
+    # convert category values to number 0 or 1
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].str.slice(-1) 
+        
+        # convert column from string to numeric
+        categories[column] = pd.to_numeric(categories[column])
+        
+    # drop the original categories column from `df`   
+    df = df.drop(columns = "categories")
+    
+    # concatenate the original dataframe with the new `categories` dataframe
+    df = pd.concat([df, categories], axis = 1)
+    
+    # drop duplicates
+    df = df.drop_duplicates()
+    
+    return df
 
 def save_data(df, database_filename):
-    pass  
-
+    # create sqllite db
+    engine = create_engine(f"sqlite:///{database_filename}")
+    
+    #save to db
+    df.to_sql('Messages', engine, index=False)  
+    
 
 def main():
     if len(sys.argv) == 4:

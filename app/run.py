@@ -8,7 +8,10 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+
+# from sklearn.externals import joblib -> deprecated! changed to "import joblib"
+
+import joblib
 from sqlalchemy import create_engine
 
 
@@ -26,11 +29,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('Messages', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -39,31 +42,83 @@ model = joblib.load("../models/your_model_name.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
+    # graphs = [
+    #     {
+    #         'data': [
+    #             Bar(
+    #                 x=genre_names,
+    #                 y=genre_counts
+    #             )
+    #         ],
+
+    #         'layout': {
+    #             'title': 'Distribution of Message Genres',
+    #             'yaxis': {
+    #                 'title': "Count"
+    #             },
+    #             'xaxis': {
+    #                 'title': "Genre"
+    #             }
+    #         }
+    #     }
+    # ]
+    
+    # NEW: counts by category
+    df2 = df[df.columns[4:]].sum()
+    cat_counts = df2.tolist()
+    cat_names = df2.index.str.replace("_"," ").tolist()
+    
+    # NEW: counts per gategory and genre
+    df3 =df.groupby('genre').sum()[df.columns[4:]]
+    cat_genre_counts = df3.to_numpy()
+    
+    # define graphs
     graphs = [
         {
             'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
+                {
+                    'type' : 'bar',
+                    'x': cat_names,
+                    'y': cat_counts
+                }
             ],
-
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Counts per Category',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Category"
+                }
+            }
+        },
+        {
+            'data': [
+                {
+                    'type' : 'heatmap',
+                    'z' : cat_genre_counts,
+                    'x' : cat_names,
+                    'y' : genre_names
+                }
+            ],
+            'layout': {
+                'title': 'Counts per Category and genre',
+                'yaxis': {
+                    'title': "genre"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
+       
     ]
     
     # encode plotly graphs in JSON
@@ -91,10 +146,9 @@ def go():
         classification_result=classification_results
     )
 
-
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
-
+    # app.run(host='0.0.0.0', port=3001, debug=True)
+    app.run(debug=True)
 
 if __name__ == '__main__':
     main()
