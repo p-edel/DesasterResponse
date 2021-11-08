@@ -6,9 +6,11 @@ import pandas as pd
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
 from nltk import pos_tag
 
-nltk.download(['punkt', 'wordnet','averaged_perceptron_tagger']) # download ressources
+nltk.download(['punkt', 'wordnet','averaged_perceptron_tagger','stopwords']) # download ressources
 
 from sklearn.pipeline import Pipeline
 from sklearn.multioutput import MultiOutputClassifier
@@ -45,6 +47,9 @@ def tokenize(text):
 
     # tokenize
     tokens = word_tokenize(text)
+    
+    # remove stop words
+    tokens = [tok for tok in tokens if tok not in stopwords.words("english")]
 
     # lemmatize
     tokens_lem = [WordNetLemmatizer().lemmatize(tok) for tok in tokens]

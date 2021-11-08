@@ -41,6 +41,10 @@ def clean_data(df):
         # convert column from string to numeric
         categories[column] = pd.to_numeric(categories[column])
         
+        # convert numbers >1 to 1 (e.g. for "related")
+        categories.loc[categories[column]>1,[column]] = 1
+    
+            
     # drop the original categories column from `df`   
     df = df.drop(columns = "categories")
     
@@ -59,7 +63,7 @@ def save_data(df, database_filename):
     engine = create_engine(f"sqlite:///{database_filename}")
     
     #save to db
-    df.to_sql('Messages', engine, index=False)  
+    df.to_sql('Messages', engine, index=False, if_exists="replace")
     
 
 def main():
